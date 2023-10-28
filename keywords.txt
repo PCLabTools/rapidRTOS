@@ -7,14 +7,43 @@
 #######################################
 
 rapidRTOS KEYWORD1
+rapidROS_manager  KEYWORD1
+rapidPlugin KEYWORD1
+rapidDebug  KEYWORD1
+rapidFunction KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
+reg KEYWORD2
+dereg KEYWORD2
+setDebugLevel KEYWORD2
+setDebugStream  KEYWORD2
+printDebug  KEYWORD2
+getTaskHandle KEYWORD2
+getTaskStatus KEYWORD2
+getNumTasks KEYWORD2
+printTaskStatus KEYWORD2
+parse KEYWORD2
 run KEYWORD2
+runCore KEYWORD2
 stop  KEYWORD2
+cmd KEYWORD2
+interface KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
+
+rapidRTOS_MAX_MODULES LITERAL1
+rapidRTOS_DEFAULT_STACK_SIZE LITERAL1
+rapidRTOS_DEFAULT_INTERFACE_BUFFER  LITERAL1
+rapidRTOS_DEFAULT_QUEUE_SIZE  LITERAL1
+rapidRTOS_DEFAULT_PRIORITY  LITERAL1
+_pID  LITERAL1
+_iID  LITERAL1
+_taskHandle LITERAL1
+_interfaceHandle  LITERAL1
+_taskQueue  LITERAL1
+_taskResponse LITERAL1
