@@ -13,10 +13,18 @@
 #define rapidRTOS_h
 
 #include <Arduino.h>
+
+#ifdef BOARD_ESP
+#include "freertos\FreeRTOS.h"
+#include "freertos\task.h"
+#include "freertos\queue.h"
+#include "freertos\timers.h"
+#else
 #include <FreeRTOS.h>
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
+#endif
 
 #define rapidPASS 1
 #define rapidFAIL 0

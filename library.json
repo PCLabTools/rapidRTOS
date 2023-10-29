@@ -1,6 +1,6 @@
 {
   "name": "rapidRTOS",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FreeRTOS based core library for running \"rapidPlugins\" which enable rapid prototyping using the Arduino framework and PlatformIO to integrate common sensors and peripherals",
   "keywords": "FreeRTOS, RTOS, rapid, arduino",
   "repository":
