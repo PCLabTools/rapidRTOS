@@ -285,7 +285,7 @@ TaskStatus_t rapidRTOS_manager::getTaskStatus(const char* taskName)
   {
     if(!strcmp(_taskNames[i],taskName))
     {
-      #ifdef BOARD_ESP
+      #ifdef BOARD_ESP32
       taskstatus.pcTaskName = _taskNames[i];
       taskstatus.eCurrentState = eInvalid;
       taskstatus.pxStackBase = NULL;

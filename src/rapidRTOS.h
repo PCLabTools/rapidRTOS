@@ -14,7 +14,7 @@
 
 #include <Arduino.h>
 
-#ifdef BOARD_ESP
+#ifdef BOARD_ESP32
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -166,9 +166,17 @@ BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t
   {
     _taskQueue = xQueueCreate(queueSize, sizeof(const char*));
     _taskResponse = xQueueCreate(1, sizeof(const char*));
-    #ifdef BOARD_ESP
+    #ifdef BOARD_ESP32
     if(xTaskCreatePinnedToCore(child, _pID, stackDepth, this, priority, &_taskHandle, core)\
     && xTaskCreatePinnedToCore(&interface_loop, _iID, interfaceDepth, this, priority, &_interfaceHandle, core))\
+    return (BaseType_t)rapidRTOS.reg(_taskHandle, _pID, &_taskQueue, &_taskResponse);
+    #elif BOARD_TEENSY
+    if(xTaskCreate(child, _pID, stackDepth, this, priority, &_taskHandle)\
+    && xTaskCreate(&interface_loop, _iID, interfaceDepth, this, priority, &_interfaceHandle))\
+    return (BaseType_t)rapidRTOS.reg(_taskHandle, _pID, &_taskQueue, &_taskResponse);
+    #elif BOARD_STM32
+    if(xTaskCreate(child, _pID, stackDepth, this, priority, &_taskHandle)\
+    && xTaskCreate(&interface_loop, _iID, interfaceDepth, this, priority, &_interfaceHandle))\
     return (BaseType_t)rapidRTOS.reg(_taskHandle, _pID, &_taskQueue, &_taskResponse);
     #else
     if(xTaskCreateAffinitySet(child, _pID, stackDepth, this, priority, core, &_taskHandle)\
