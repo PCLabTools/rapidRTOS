@@ -22,6 +22,15 @@
 #define rapidRTOS_MAX_MODULES 10
 #endif
 
+#ifndef rapidRTOS_MANAGER_STACK_SIZE
+/**
+ * @brief Stack size used by the manager task. This can be increased
+ * to accomodate increasing numbers of plugins and tasks.
+ * 
+ */
+#define rapidRTOS_MANAGER_STACK_SIZE 256
+#endif
+
 /**
  * @brief rapidRTOS manager class provides a 'singleton' class for a rapidRTOS
  * task management object. Using this class will allow for
@@ -37,7 +46,7 @@ class rapidRTOS_manager
       static rapidRTOS_manager* singleton = new rapidRTOS_manager();
       return *singleton;
     }
-    uint8_t reg(TaskHandle_t taskHandle, QueueHandle_t* command, QueueHandle_t* response);
+    uint8_t reg(TaskHandle_t taskHandle, const char* taskName, QueueHandle_t* command, QueueHandle_t* response);
     uint8_t dereg(const char* taskName);
     const char* cmd(const char* taskName, const char* command, TickType_t timeout = portMAX_DELAY);
     uint8_t setDebugLevel(uint8_t debugLevel);
@@ -78,7 +87,7 @@ rapidRTOS_manager::rapidRTOS_manager()
     _taskNames[i] = "";
   }
   #ifndef rapidRTOS_DISABLE_MANAGER
-  xTaskCreate(managerTask, "rapidRTOS_manager", 256, this, 1, &_managerHandle);
+  xTaskCreate(managerTask, "rapidRTOS_manager", rapidRTOS_MANAGER_STACK_SIZE, this, 1, &_managerHandle);
   #endif
 }
 
@@ -91,16 +100,13 @@ rapidRTOS_manager::rapidRTOS_manager()
  * @param response response queue reference
  * @return uint8_t 1 = no space for task registration | 0 = pass
  */
-uint8_t rapidRTOS_manager::reg(TaskHandle_t taskHandle, QueueHandle_t* command, QueueHandle_t* response = NULL)
+uint8_t rapidRTOS_manager::reg(TaskHandle_t taskHandle, const char* taskName, QueueHandle_t* command, QueueHandle_t* response = NULL)
 {
-  TaskStatus_t taskStatus;
-  uint8_t freeStackSpace;
-  vTaskGetInfo(taskHandle, &taskStatus, freeStackSpace, eRunning);
   for (size_t i = 0; i < rapidRTOS_MAX_MODULES; i++)
   {
     if(!strcmp(_taskNames[i],""))
     {
-      _taskNames[i] = taskStatus.pcTaskName;
+      _taskNames[i] = taskName;
       _taskHandles[i] = taskHandle;
       _taskQueues[i] = command;
       _responseQueues[i] = response;
@@ -126,10 +132,10 @@ uint8_t rapidRTOS_manager::dereg(const char* taskName)
       _taskHandles[i] = NULL;
       _taskQueues[i] = NULL;
       _responseQueues[i] = NULL;
-      return rapidPASS;
+      return 1;
     }
   }
-  return rapidFAIL;
+  return 0;
 }
 
 /**
@@ -279,7 +285,16 @@ TaskStatus_t rapidRTOS_manager::getTaskStatus(const char* taskName)
   {
     if(!strcmp(_taskNames[i],taskName))
     {
+      #ifdef BOARD_ESP
+      taskstatus.pcTaskName = _taskNames[i];
+      taskstatus.eCurrentState = eInvalid;
+      taskstatus.pxStackBase = NULL;
+      taskstatus.ulRunTimeCounter = 0;
+      taskstatus.uxCurrentPriority = 0;
+      taskstatus.xTaskNumber = 0;
+      #else
       vTaskGetInfo(_taskHandles[i], &taskstatus, freestackspace, eInvalid);
+      #endif
     }
   }
   return taskstatus;

@@ -15,19 +15,16 @@
 #include <Arduino.h>
 
 #ifdef BOARD_ESP
-#include "freertos\FreeRTOS.h"
-#include "freertos\task.h"
-#include "freertos\queue.h"
-#include "freertos\timers.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "freertos/timers.h"
 #else
 #include <FreeRTOS.h>
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
 #endif
-
-#define rapidPASS 1
-#define rapidFAIL 0
 
 /**
  * @brief rapidDebug type enum for categorising debug
@@ -58,6 +55,10 @@ struct rapidFunction
 #define rapidRTOS_DEFAULT_STACK_SIZE 128        // Default stack size used by rapidPlugins if not specified during run
 #endif
 
+#ifndef rapidRTOS_DEFAULT_INTERFACE_SIZE
+#define rapidRTOS_DEFAULT_INTERFACE_SIZE 512    // Default interface stack size if not specified during run
+#endif
+
 #ifndef rapidRTOS_DEFAULT_INTERFACE_BUFFER
 #define rapidRTOS_DEFAULT_INTERFACE_BUFFER 64   // Default interface buffer size for rapidFunction commands
 #endif
@@ -81,8 +82,8 @@ class rapidPlugin
   public:
     rapidPlugin();
     ~rapidPlugin();
-    BaseType_t run(TaskFunction_t child, uint32_t stackDepth = rapidRTOS_DEFAULT_STACK_SIZE, int queueSize = rapidRTOS_DEFAULT_QUEUE_SIZE, UBaseType_t priority = rapidRTOS_DEFAULT_PRIORITY);
-    BaseType_t runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth = rapidRTOS_DEFAULT_STACK_SIZE, int queueSize = rapidRTOS_DEFAULT_QUEUE_SIZE, UBaseType_t priority = rapidRTOS_DEFAULT_PRIORITY);
+    BaseType_t run(TaskFunction_t child, uint32_t stackDepth = rapidRTOS_DEFAULT_STACK_SIZE, uint32_t interfaceDepth = rapidRTOS_DEFAULT_INTERFACE_SIZE, int queueSize = rapidRTOS_DEFAULT_QUEUE_SIZE, UBaseType_t priority = rapidRTOS_DEFAULT_PRIORITY);
+    BaseType_t runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth = rapidRTOS_DEFAULT_STACK_SIZE, uint32_t interfaceDepth = rapidRTOS_DEFAULT_INTERFACE_SIZE, int queueSize = rapidRTOS_DEFAULT_QUEUE_SIZE, UBaseType_t priority = rapidRTOS_DEFAULT_PRIORITY);
     void stop();
     const char* cmd(const char* command, TickType_t timeout = portMAX_DELAY);
     virtual uint8_t interface(rapidFunction incoming, char messageBuffer[]);
@@ -124,7 +125,7 @@ rapidPlugin::~rapidPlugin()
  * @param priority FreeRTOS task priority
  * @return BaseType_t 1 = task started and registered | 0 = task failed to start
  */
-BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, int queueSize, UBaseType_t priority)
+BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth int queueSize, UBaseType_t priority)
 {
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
@@ -132,8 +133,8 @@ BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, int queue
     _taskQueue = xQueueCreate(queueSize, sizeof(const char*));
     _taskResponse = xQueueCreate(1, sizeof(const char*));
     if(xTaskCreate(child, _pID, stackDepth, this, priority, &_taskHandle)\
-    && xTaskCreate(&interface_loop, _iID, 512, this, priority, &_interfaceHandle))\
-    return (BaseType_t)rapidRTOS.reg(_taskHandle, &_taskQueue, &_taskResponse);
+    && xTaskCreate(&interface_loop, _iID, interfaceDepth, this, priority, &_interfaceHandle))\
+    return (BaseType_t)rapidRTOS.reg(_taskHandle, _pID, &_taskQueue, &_taskResponse);
     else
     {
       vTaskDelete(_taskHandle);
@@ -158,16 +159,22 @@ BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, int queue
  * @param priority FreeRTOS task priority
  * @return BaseType_t BaseType_t 1 = task started and registered | 0 = task failed to start
  */
-BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth, int queueSize, UBaseType_t priority)
+BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth int queueSize, UBaseType_t priority)
 {
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
   {
     _taskQueue = xQueueCreate(queueSize, sizeof(const char*));
     _taskResponse = xQueueCreate(1, sizeof(const char*));
+    #ifdef BOARD_ESP
+    if(xTaskCreatePinnedToCore(child, _pID, stackDepth, this, priority, &_taskHandle, core)\
+    && xTaskCreatePinnedToCore(&interface_loop, _iID, interfaceDepth, this, priority, &_interfaceHandle, core))\
+    return (BaseType_t)rapidRTOS.reg(_taskHandle, _pID, &_taskQueue, &_taskResponse);
+    #else
     if(xTaskCreateAffinitySet(child, _pID, stackDepth, this, priority, core, &_taskHandle)\
-    && xTaskCreateAffinitySet(&interface_loop, _iID, 512, this, priority, core, &_interfaceHandle))\
-    return (BaseType_t)rapidRTOS.reg(_taskHandle, &_taskQueue, &_taskResponse);
+    && xTaskCreateAffinitySet(&interface_loop, _iID, interfaceDepth, this, priority, core, &_interfaceHandle))\
+    return (BaseType_t)rapidRTOS.reg(_taskHandle, _pID, &_taskQueue, &_taskResponse);
+    #endif
     else
     {
       vTaskDelete(_taskHandle);

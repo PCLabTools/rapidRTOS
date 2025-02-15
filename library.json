@@ -1,12 +1,12 @@
 {
   "name": "rapidRTOS",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "FreeRTOS based core library for running \"rapidPlugins\" which enable rapid prototyping using the Arduino framework and PlatformIO to integrate common sensors and peripherals",
   "keywords": "FreeRTOS, RTOS, rapid, arduino",
   "repository":
   {
     "type": "git",
-    "url": "https://github.com/PCLabTools/rapidRTOS"
+    "url": "https://github.com/PCLabTools/rapidRTOS.git"
   },
   "authors":
   [
@@ -19,5 +19,5 @@
   "license": "GNU",
   "homepage": "https://github.com/PCLabTools/rapidRTOS",
   "frameworks": "arduino",
-  "platforms": "https://github.com/maxgerhardt/platform-raspberrypi.git"
+  "platforms": "earlphilhower, espressif32, avr, pico, teensy"
 }
