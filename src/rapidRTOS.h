@@ -125,7 +125,7 @@ rapidPlugin::~rapidPlugin()
  * @param priority FreeRTOS task priority
  * @return BaseType_t 1 = task started and registered | 0 = task failed to start
  */
-BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth int queueSize, UBaseType_t priority)
+BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth, int queueSize, UBaseType_t priority)
 {
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
@@ -159,7 +159,7 @@ BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, uint32_t 
  * @param priority FreeRTOS task priority
  * @return BaseType_t BaseType_t 1 = task started and registered | 0 = task failed to start
  */
-BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth int queueSize, UBaseType_t priority)
+BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth, int queueSize, UBaseType_t priority)
 {
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
