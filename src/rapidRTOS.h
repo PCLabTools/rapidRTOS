@@ -52,11 +52,11 @@ struct rapidFunction
 #include "rapidRTOS_manager.h"
 
 #ifndef rapidRTOS_DEFAULT_STACK_SIZE
-#define rapidRTOS_DEFAULT_STACK_SIZE 128        // Default stack size used by rapidPlugins if not specified during run
+#define rapidRTOS_DEFAULT_STACK_SIZE 64         // Default stack size used by rapidPlugins if not specified during run
 #endif
 
 #ifndef rapidRTOS_DEFAULT_INTERFACE_SIZE
-#define rapidRTOS_DEFAULT_INTERFACE_SIZE 512    // Default interface stack size if not specified during run
+#define rapidRTOS_DEFAULT_INTERFACE_SIZE 256    // Default interface stack size if not specified during run
 #endif
 
 #ifndef rapidRTOS_DEFAULT_INTERFACE_BUFFER
@@ -127,6 +127,10 @@ rapidPlugin::~rapidPlugin()
  */
 BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth, int queueSize, UBaseType_t priority)
 {
+  #ifdef BOARD_ESP32
+  stackDepth = stackDepth * 4;
+  interfaceDepth = interfaceDepth * 4;
+  #endif
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
   {
@@ -161,6 +165,10 @@ BaseType_t rapidPlugin::run(TaskFunction_t child, uint32_t stackDepth, uint32_t 
  */
 BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t stackDepth, uint32_t interfaceDepth, int queueSize, UBaseType_t priority)
 {
+  #ifdef BOARD_ESP32
+  stackDepth = stackDepth * 4;
+  interfaceDetph = interfaceDepth * 4;
+  #endif
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
   {
