@@ -167,7 +167,7 @@ BaseType_t rapidPlugin::runCore(UBaseType_t core, TaskFunction_t child, uint32_t
 {
   #ifdef BOARD_ESP32
   stackDepth = stackDepth * 4;
-  interfaceDetph = interfaceDepth * 4;
+  interfaceDepth = interfaceDepth * 4;
   #endif
   sprintf(_iID, "i_%s", _pID);
   if (!rapidRTOS.getTaskHandle(_pID))
