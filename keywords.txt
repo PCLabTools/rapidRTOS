@@ -19,6 +19,7 @@ rapidFunction KEYWORD1
 reg KEYWORD2
 dereg KEYWORD2
 setDebugLevel KEYWORD2
+getDebugLevel KEYWORD2
 setDebugStream  KEYWORD2
 printDebug  KEYWORD2
 getTaskHandle KEYWORD2

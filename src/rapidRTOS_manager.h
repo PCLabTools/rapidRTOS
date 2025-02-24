@@ -50,6 +50,7 @@ class rapidRTOS_manager
     uint8_t dereg(const char* taskName);
     const char* cmd(const char* taskName, const char* command, TickType_t timeout = portMAX_DELAY);
     uint8_t setDebugLevel(uint8_t debugLevel);
+    uint8_t getDebugLevel();
     void setDebugStream(Stream* streamRef);
     template<typename... Args> void printDebug(uint8_t debugLevel, const char* message, Args... args);
     template<typename... Args> void printDebug(uint8_t debugLevel, rapidDebug messageType, const char* message, Args... args);
@@ -170,6 +171,16 @@ const char* rapidRTOS_manager::cmd(const char* taskName, const char* command, Ti
 uint8_t rapidRTOS_manager::setDebugLevel(uint8_t debugLevel)
 {
   _debugLevel = debugLevel;
+  return _debugLevel;
+}
+
+/**
+ * @brief Gets the currently set debug level
+ * 
+ * @return uint8_t current debug level
+ */
+uint8_t rapidRTOS_manager::getDebugLevel()
+{
   return _debugLevel;
 }
 
